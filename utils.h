@@ -65,6 +65,12 @@ extern "C"
 		int block_count;
 	}pool_t;
 
+	typedef struct buffer_s {
+		void*  data_ptr;
+		size_t data_used;
+		size_t data_len;
+		pool_t* pool;
+	}buffer_t;
 
 	void list_init(list_t* list_val);
 	void list_link(list_t* list_before, list_t* list_after);
@@ -76,6 +82,11 @@ extern "C"
 	int     pool_destory(pool_t* pool);
 	void*   pool_malloc(pool_t* pool, int rq_size);
 	void*   pool_malloc_fast(pool_t* pool, int rq_size);
+
+	void buffer_init(buffer_t* buffer, pool_t* pool, size_t init_size);
+	void buffer_write(buffer_t* buffer, void* data_ptr, size_t data_len);
+	void* buffer_data(buffer_t* buffer);
+	void* buffer_len(buffer_t* buffer);
 #ifdef __cplusplus
 }
 #endif

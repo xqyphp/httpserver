@@ -11,7 +11,17 @@
 
 #define SERVER_PORT 6666
 
-#define MSG_TEST "msg from server"
+#define MSG_TEST "msg from server!!!"
+
+int my_http_request_process(http_connection_t* connection)
+{
+	http_request_t* request = &connection->request;
+	http_response_t* response = &connection->response;
+	http_response_status(response,200);
+	http_response_header_add(response, "Content-Language", "en,zh");
+	http_response_body_write(response, MSG_TEST, strlen(MSG_TEST));
+	return -1;
+}
 
 int http_event_callback(socket_event_t* ev)
 {
@@ -24,7 +34,7 @@ int http_event_callback(socket_event_t* ev)
                 printf("-------------------->new client\n");
                 user_ptr = (http_connection_t*)malloc(sizeof(http_connection_t));
                 ev->user_data = user_ptr;
-                return http_connection_init(user_ptr,ev->clientfd,K_NULL);
+                return http_connection_init(user_ptr,ev->clientfd, my_http_request_process);
         }
         case CLIENT_READ:
         {

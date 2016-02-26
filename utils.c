@@ -172,3 +172,34 @@ int     pool_destory(pool_t* pool)
 	return 1;
 }
 
+void buffer_init(buffer_t* buffer, pool_t* pool, size_t init_size)
+{
+	buffer->pool = pool;
+	buffer->data_ptr = pool_malloc(pool,init_size);
+	memset(buffer->data_ptr, 0, init_size);
+	buffer->data_len = init_size;
+	buffer->data_used = 0;
+}
+
+void buffer_write(buffer_t* buffer, void* data_ptr, size_t data_len)
+{
+	if (buffer->data_len - buffer->data_used < data_len) {
+		char* odata = buffer->data_ptr;
+		size_t olen = buffer->data_len;
+		buffer->data_ptr = pool_malloc(buffer->pool, buffer->data_len + data_len);
+		buffer->data_len = olen + data_len;
+		memcpy(buffer->data_ptr, odata, olen);
+	}
+	memcpy((char*)buffer->data_ptr + buffer->data_used, data_ptr, data_len);
+	buffer->data_used += data_len;
+	return K_SUCCESS;
+}
+
+void* buffer_data(buffer_t* buffer)
+{
+	return buffer->data_ptr;
+}
+void* buffer_len(buffer_t* buffer)
+{
+	return buffer->data_used;
+}
