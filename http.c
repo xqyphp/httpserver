@@ -379,6 +379,23 @@ http_parse_request_line(http_connection_t* connection)
 	return -1;
 
 }
+
+static void http_header_init(http_header_t* header)
+{
+	bzero(header->key, HEADER_LEN);
+	bzero(header->val, HEADER_LEN);
+	k_list_init((k_list_t*)header);
+}
+
+const char* skip_space(const char* str)
+{
+	while (*str == SPACE_CHAR)
+	{
+		str++;
+	}
+	return str;
+}
+
 static int
 http_parse_headers(http_connection_t* connection)
 {
@@ -392,7 +409,7 @@ http_parse_headers(http_connection_t* connection)
 	char* ptr;
 	http_request_t *request = &connection->request;
 	ptr = connection->rdata_ptr + connection->rdata_index;
-	printf("http_parse_headers---------------------\n", ptr);
+	log_debug("http_parse_headers---------------------\n", ptr);
 	end_ptr = strstr(ptr, SPACE_LINE);
 	if (end_ptr == K_NULL) {
 		printf("end_ptr == K_NULL\n", ptr);
@@ -402,20 +419,22 @@ http_parse_headers(http_connection_t* connection)
 	while (K_TRUE) {
 		next_ptr = strstr(ptr, NEXT_LINE);
 		if (next_ptr > end_ptr) {
-			printf("--end header--\n", next_ptr, end_ptr);
+			log_debug("--end header--\n", next_ptr, end_ptr);
 			break;
 		}
 		colon_ptr = strstr(ptr, COLON_STR);
 		if (colon_ptr == K_NULL || colon_ptr >= next_ptr) {
-			printf("--wrong header--\n");
+			log_debug("--wrong header--\n");
 			ptr = next_ptr + 2;
 			continue;
 		}
 		http_header_t* header = k_mpool_malloc(connection->pool, sizeof(http_header_t));
+		http_header_init(header);
 		strncpy(header->key, ptr, colon_ptr - ptr);
-		strncpy(header->val, colon_ptr + 1, next_ptr - (colon_ptr + 1));
+		const char* val_ptr = skip_space(colon_ptr + 1);
+		strncpy(header->val, val_ptr, next_ptr - val_ptr);
 		k_list_insert_before((k_list_t*)&request->headers, (k_list_t*)header);
-		printf("%s:%s\n", header->key, header->val);
+		log_debug("%s:%s\n", header->key, header->val);
 		ptr = next_ptr + 2;
 	}
 
@@ -594,8 +613,8 @@ my_write(int fd, void *buffer, int length)
 	bytes_left = length;
 	while (bytes_left > 0)
 	{
-
-		written_bytes = write(fd, ptr, bytes_left);
+		written_bytes = k_send(fd, ptr, bytes_left, 0);
+		//written_bytes = write(fd, ptr, bytes_left);
 		if (written_bytes <= 0)
 		{
 			if (errno == EINTR)
