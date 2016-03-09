@@ -23,11 +23,11 @@ int module_html_http_request_process(http_connection_t* connection)
 	char buffer[512];
 	sprintf(buffer,"%s%s", root_path, url_path);
 
-	FILE *fp = NULL;
+	FILE *fp = K_NULL;
 	
 	log_info("-------%s------",buffer);
 	fp = fopen(buffer, "r");
-	if (NULL == fp)
+	if (K_NULL == fp)
 	{
 		http_response_status(response, 404);
 		http_response_header_set(response, "Content-Language", "en,zh");
@@ -40,13 +40,13 @@ int module_html_http_request_process(http_connection_t* connection)
 	while (!feof(fp))//判定文件是否结尾
 	{
 
-		if (fgets(tmp, 64, fp) != NULL) {
+		if (fgets(tmp, 64, fp) != K_NULL) {
 			http_response_body_write(response, tmp, strlen(tmp));
 		}
 	}
 
 	fclose(fp);
-	fp = NULL;
+	fp = K_NULL;
 
 	return -1;
 }

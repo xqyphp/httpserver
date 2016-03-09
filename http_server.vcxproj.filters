@@ -40,6 +40,9 @@
     <ClCompile Include="sql.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ksp_lexer.c">
+      <Filter>Source Files\ksp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="http.h">
@@ -75,6 +78,9 @@
     <ClInclude Include="module_html.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ksp_lexer.h">
+      <Filter>Header Files\ksp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -85,6 +91,12 @@
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{9dafe602-c5cd-426f-8da8-487167ce9f33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ksp">
+      <UniqueIdentifier>{11456bd1-d167-4f9c-b8a4-2e3774526c47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ksp">
+      <UniqueIdentifier>{db21dbbc-a2b4-4fbc-8b43-106cceab6cdc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

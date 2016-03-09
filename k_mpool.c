@@ -40,7 +40,7 @@ static block_t* pool_find_block(k_mpool_t* pool, int rq_size)
 		block = block_next;
 	}
 	log_debug("pool_find_block->null.");
-	return NULL;
+	return K_NULL;
 }
 
 static block_t* pool_new_block(k_mpool_t* pool, int block_size)
@@ -65,7 +65,7 @@ k_mpool_t* k_mpool_create(const char* name, int init_size, int increase)
 	pool->cur_size = init_size;
 	pool->increase_size = increase;
 	pool->block_count = 0;
-	pool->current_block = NULL;
+	pool->current_block = K_NULL;
 	k_list_init(&(pool->blocks));
 	pool_new_block(pool, init_size);
 	return pool;
@@ -75,9 +75,9 @@ void*   k_mpool_malloc(k_mpool_t*pool, int rq_size)
 {
 	log_debug("pool_malloc -> rq_size=%d.", rq_size);
 	block_t* block = pool_find_block(pool, rq_size);
-	if (block == NULL) {
+	if (block == K_NULL) {
 		block = pool_new_block(pool, pool->increase_size > rq_size ? pool->increase_size : rq_size);
-		assert(block != NULL);
+		assert(block != K_NULL);
 	}
 	pool->current_block = block;
 	void* ptr_mem = block->cur_pos;
@@ -91,9 +91,9 @@ void*   k_mpool_malloc_fast(k_mpool_t* pool, int rq_size)
 	log_debug("pool_malloc_fast -> rq_size=%d.", rq_size);
 
 	block_t* block = pool->current_block;
-	if (block == NULL || pool_block_get_free(block) < rq_size) {
+	if (block == K_NULL || pool_block_get_free(block) < rq_size) {
 		block = pool_new_block(pool, pool->increase_size > rq_size ? pool->increase_size : rq_size);
-		assert(block != NULL);
+		assert(block != K_NULL);
 	}
 	pool->current_block = block;
 	void* ptr_mem = block->cur_pos;
