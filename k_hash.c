@@ -3,15 +3,39 @@
 #include <assert.h>
 #include <string.h>
 
-k_size_t k_get_hash_str(const char* str_val)
+static int str_hash(const char* str_val,int max_size)
 {
-	return strlen(str_val);
+	return strlen(str_val) % max_size;
 }
 
-k_size_t k_get_hash_int(const int*  int_val)
+static int int_hash(const int*  int_val, int max_size)
 {
-	return (*int_val) % 10;
+	return (*int_val) % max_size;
 }
+
+int str_compare(const char* left, const char* right)
+{
+	return strcmp(left,right);
+}
+
+int int_compare(const int* left, const int* right)
+{
+	return *left - *right;
+}
+
+
+k_status_t k_hash_init_string(k_hash_table_t* hash_table, k_mpool_t* pool,
+	k_size_t hash_arr_size, k_getkey_t fn_getkey)
+{
+	return k_hash_init(hash_table, pool, hash_arr_size, fn_getkey, str_hash, str_compare);
+}
+
+k_status_t k_hash_init_integer(k_hash_table_t* hash_table, k_mpool_t* pool,
+	k_size_t hash_arr_size, k_getkey_t fn_getkey)
+{
+	return k_hash_init(hash_table, pool, hash_arr_size, fn_getkey, int_hash, int_compare);
+}
+
 
 k_status_t k_hash_init(k_hash_table_t* hash_table, k_mpool_t* pool,
 	k_size_t buckets_count, k_getkey_t fn_getkey,
@@ -44,7 +68,7 @@ static void k_hash_bucket_init(k_hash_bucket_t* bucket, k_size_t hash_code)
 k_status_t k_hash_add(k_hash_table_t* hash_table, k_hash_entry_t* val)
 {
 	void* hash_key = hash_table->getkey(val);
-	k_size_t   hash_code = hash_table->gethash(hash_key);
+	k_size_t   hash_code = hash_table->gethash(hash_key,hash_table->buckets_count);
 	assert(hash_code < hash_table->buckets_count);
 	if (k_hash_get(hash_table, hash_key) != K_NULL) {
 		return K_ERROR;
@@ -67,7 +91,7 @@ k_status_t k_hash_add(k_hash_table_t* hash_table, k_hash_entry_t* val)
 
 k_hash_entry_t* k_hash_get(k_hash_table_t* hash_table, void* key)
 {
-	k_size_t   hash_code = hash_table->gethash(key);
+	k_size_t   hash_code = hash_table->gethash(key,hash_table->buckets_count);
 	k_hash_bucket_t* bucket = hash_table->buckets[hash_code];
 	if (bucket == K_NULL) {
 		return K_NULL;

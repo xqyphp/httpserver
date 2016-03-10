@@ -21,7 +21,7 @@ enum k_status_enum {
 
 typedef int(*k_compare_t)(void* left, void* right);
 typedef void*            (*k_getkey_t)(void* val);
-typedef int(*k_gethash_t)(void* hash_key);
+typedef int(*k_gethash_t)(void* hash_key,int max_size);
 
 typedef int					k_errno_t;
 typedef unsigned int		k_size_t;

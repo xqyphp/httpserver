@@ -54,8 +54,15 @@ struct k_hash_table_s
 	k_mpool_t* pool;
 };
 
-k_size_t k_get_hash_str(const char* str_val);
-k_size_t k_get_hash_int(const int*  int_val);
+k_size_t str_hash(const char* str_val);
+k_size_t int_hash(const int*  int_val);
+
+k_status_t k_hash_init_string(k_hash_table_t* hash_table, k_mpool_t* pool,
+	k_size_t hash_arr_size, k_getkey_t fn_getkey);
+
+k_status_t k_hash_init_integer(k_hash_table_t* hash_table, k_mpool_t* pool,
+	k_size_t hash_arr_size, k_getkey_t fn_getkey);
+
 
 k_status_t k_hash_init(k_hash_table_t* hash_table,k_mpool_t* pool,
 	k_size_t hash_arr_size,k_getkey_t fn_getkey,
