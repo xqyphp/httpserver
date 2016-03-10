@@ -10,29 +10,30 @@ static const char* g_ksp_words[128] = { K_NULL };
 
 static void ksp_lexer_init_common(ksp_lexer_t* lexer)
 {
-	g_ksp_words[IF]= "if";
-	g_ksp_words[ELSE]= "else";
-	g_ksp_words[FOR]= "for";
-	g_ksp_words[WHILE]= "while";
-	g_ksp_words[RETURN]= "return";
-	g_ksp_words[RBL]= "(";
-	g_ksp_words[RBR]= ")";
-	g_ksp_words[SBR]= "[";
-	g_ksp_words[SBL]= "]";
-	g_ksp_words[BBL]= "{";
-	g_ksp_words[BBR]= "}";
-	g_ksp_words[GT]= ">";
-	g_ksp_words[LT]= "<";
-	g_ksp_words[GE]= ">=";
-	g_ksp_words[LE] = "<=";
-	g_ksp_words[EQ]= "==";
-	g_ksp_words[NOT]= "!";
-	g_ksp_words[NE]= "!=";
-	g_ksp_words[PLUS]= "+";
-	g_ksp_words[MINIS]= "-";
-	g_ksp_words[MUL]= "*";
-	g_ksp_words[DIV]= "/";
-	g_ksp_words[AS]= "=";
+	g_ksp_words[TAG_IF]= "if";
+	g_ksp_words[TAG_ELSE]= "else";
+	g_ksp_words[TAG_FOR]= "for";
+	g_ksp_words[TAG_WHILE]= "while";
+	g_ksp_words[TAG_RETURN]= "return";
+	g_ksp_words[TAG_FUNCTION] = "function";
+	g_ksp_words[TAG_RBL]= "(";
+	g_ksp_words[TAG_RBR]= ")";
+	g_ksp_words[TAG_SBR]= "[";
+	g_ksp_words[TAG_SBL]= "]";
+	g_ksp_words[TAG_BBL]= "{";
+	g_ksp_words[TAG_BBR]= "}";
+	g_ksp_words[TAG_GT]= ">";
+	g_ksp_words[TAG_LT]= "<";
+	g_ksp_words[TAG_GE]= ">=";
+	g_ksp_words[TAG_LE] = "<=";
+	g_ksp_words[TAG_EQ]= "==";
+	g_ksp_words[TAG_NOT]= "!";
+	g_ksp_words[TAG_NE]= "!=";
+	g_ksp_words[TAG_PLUS]= "+";
+	g_ksp_words[TAG_MINIS]= "-";
+	g_ksp_words[TAG_MUL]= "*";
+	g_ksp_words[TAG_DIV]= "/";
+	g_ksp_words[TAG_AS]= "=";
 	lexer->file_name = K_NULL;
 	lexer->text = K_NULL;
 	lexer->text_len = 0;
@@ -41,14 +42,15 @@ static void ksp_lexer_init_common(ksp_lexer_t* lexer)
 	lexer->_current = K_NULL;
 	lexer->_look = K_NULL;
 	lexer->pool = k_mpool_create("lexer pool", 1024, 1024);
+	k_list_init(&lexer->_words);
 }
 
 k_status_t ksp_lexer_init_doc(ksp_lexer_t* lexer, const char* file)
 {
 	FILE *fp = K_NULL;
-
+	
 	ksp_lexer_init_common(lexer);
-
+	lexer->file_name = file;
 	fp = fopen(file, "r");
 	if (K_NULL == fp)
 	{
@@ -60,12 +62,12 @@ k_status_t ksp_lexer_init_doc(ksp_lexer_t* lexer, const char* file)
 	fseek(fp, 0, 0);
 
 	k_buffer_t buffer;
-	k_buffer_init(&buffer, lexer->pool, lexer->text_len + 32);
+	k_buffer_init(&buffer, lexer->pool, lexer->text_len);
 	char tmp[64];
 
 	while (!feof(fp))
 	{
-		if (fgets(tmp, 64, fp) != K_NULL) {
+ 		if (fgets(tmp, 64, fp) != K_NULL) {
 			k_buffer_write(&buffer, tmp, strlen(tmp));
 		}
 	}
@@ -74,7 +76,8 @@ k_status_t ksp_lexer_init_doc(ksp_lexer_t* lexer, const char* file)
 	fp = K_NULL;
 
 	lexer->text = k_buffer_get_data(&buffer);
-	lexer->text[lexer->text_len] = '\0';
+	ksp_word_next(lexer);
+	return K_SUCCESS;
 
 }
 k_status_t ksp_lexer_init_string(ksp_lexer_t* lexer, const char* str)
@@ -82,6 +85,8 @@ k_status_t ksp_lexer_init_string(ksp_lexer_t* lexer, const char* str)
 	ksp_lexer_init_common(lexer);
 	lexer->text = str;
 	lexer->text_len = strlen(str);
+	ksp_word_next(lexer);
+	return K_SUCCESS;
 }
 k_status_t ksp_lexer_destroy(ksp_lexer_t* lexer)
 {
@@ -92,6 +97,7 @@ k_status_t ksp_lexer_destroy(ksp_lexer_t* lexer)
 	lexer->line = 1;
 	k_mpool_destory(lexer->pool);
 	lexer->pool = K_NULL;
+	return K_SUCCESS;
 }
 
 ksp_word_t* ksp_word_get_char(ksp_lexer_t* lexer, ksp_tag_t tag, char ch)
@@ -111,16 +117,17 @@ ksp_word_t* ksp_word_get2(ksp_lexer_t* lexer, ksp_tag_t tag, const char* val)
 ksp_word_t* ksp_word_get3(ksp_lexer_t* lexer, ksp_tag_t tag,
 	const char* val, k_size_t val_len)
 {
-	ksp_word_t* word = k_mpool_malloc(lexer->pool, sizeof(word));
+	ksp_word_t* word = k_mpool_malloc(lexer->pool, sizeof(ksp_word_t));
 	word->tag = tag;
 	if (g_ksp_words[tag] != K_NULL) {
 		word->val = g_ksp_words[tag];
 		return word;
 	}
-
+	word->val_len = val_len;
 	word->val = k_mpool_malloc(lexer->pool, val_len + 1);
-	strncpy(word->val, val_len, val);
+	memcpy(word->val, val, val_len);
 	word->val[word->val_len] = '\0';
+	return word;
 }
 
 static char look_char(ksp_lexer_t* lexer)
@@ -162,7 +169,7 @@ ksp_word_t* ksp_word_next(ksp_lexer_t* lexer)
 ksp_word_t* ksp_word_next_tag(ksp_lexer_t* lexer, ksp_tag_t tag)
 {
 	assert(lexer->_look->tag == tag);
-	if (lexer->_look->tag == tag) {
+	if (lexer->_look->tag != tag) {
 		//TODO
 		log_error("tag not equal!!!");
 	}
@@ -171,15 +178,15 @@ ksp_word_t* ksp_word_next_tag(ksp_lexer_t* lexer, ksp_tag_t tag)
 //TODO
 static k_bool_t is_id_start(char ch)
 {
-	return isalpha(ch);
+	return isalpha(ch) || ch=='_' || ch=='$';
 }
 
 static k_bool_t is_id_part(char ch)
 {
-	return isalpha(ch) || isdigit(ch);
+	return is_id_start(ch) || isdigit(ch);
 }
 
-static k_bool_t str_start_witch(const char* str, const char* part)
+static k_bool_t str_start_with(const char* str, const char* part)
 {
 	return strstr(str, part) != K_NULL;
 }
@@ -206,80 +213,80 @@ ksp_word_t* ksp_word_read(ksp_lexer_t* lexer)
 	switch (ch) {
 	case '{':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,BBL, ch);
+		return ksp_word_get_char(lexer,TAG_BBL, ch);
 	case '}':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,BBR, ch);
+		return ksp_word_get_char(lexer,TAG_BBR, ch);
 	case '[':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,SBL, ch);
+		return ksp_word_get_char(lexer,TAG_SBL, ch);
 	case ']':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,SBR, ch);
+		return ksp_word_get_char(lexer,TAG_SBR, ch);
 	case '(':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,RBL, ch);
+		return ksp_word_get_char(lexer,TAG_RBL, ch);
 	case ')':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,RBR, ch);
+		return ksp_word_get_char(lexer,TAG_RBR, ch);
 	case '+':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,PLUS, ch);
+		return ksp_word_get_char(lexer,TAG_PLUS, ch);
 	case '-':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,MINIS, ch);
+		return ksp_word_get_char(lexer,TAG_MINIS, ch);
 	case '*':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,MUL, ch);
+		return ksp_word_get_char(lexer,TAG_MUL, ch);
 	case '/':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,DIV, ch);
+		return ksp_word_get_char(lexer,TAG_DIV, ch);
 	case ';':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,SEM, ch);
+		return ksp_word_get_char(lexer,TAG_SEM, ch);
 	case ',':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,COMMA, ch);
+		return ksp_word_get_char(lexer,TAG_COMMA, ch);
 	case '.':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,DOT, ch);
+		return ksp_word_get_char(lexer,TAG_DOT, ch);
 	case ':':
 		next_char(lexer);
-		return ksp_word_get_char(lexer,COLON, ch);
+		return ksp_word_get_char(lexer,TAG_COLON, ch);
 	case '=':
 		if (next_char(lexer) == '=') {
 			next_char(lexer);
-			return ksp_word_get2(lexer,EQ, "==");
+			return ksp_word_get2(lexer,TAG_EQ, "==");
 		}
 		else {
-			return ksp_word_get2(lexer,AS, "=");
+			return ksp_word_get2(lexer,TAG_AS, "=");
 		}
 	case '>':
 		if (next_char(lexer) == '=') {
 			next_char(lexer);
-			return ksp_word_get(lexer,GE);
+			return ksp_word_get(lexer,TAG_GE);
 		}
 		else {
-			return ksp_word_get(lexer,GT);
+			return ksp_word_get(lexer,TAG_GT);
 		}
 	case '<':
 		if (next_char(lexer) == '=') {
 			next_char(lexer);
-			return ksp_word_get(lexer,LE);
+			return ksp_word_get(lexer,TAG_LE);
 		}
 		else {
-			return ksp_word_get(lexer,LT);
+			return ksp_word_get(lexer,TAG_LT);
 		}
 	case '&':
 		next_char(lexer);
-		return ksp_word_get(lexer,AND, ch);
+		return ksp_word_get(lexer,TAG_AND);
 	case '!':
 		if (next_char(lexer) == '=') {
 			next_char(lexer);
-			return ksp_word_get(lexer,NE);
+			return ksp_word_get(lexer,TAG_NE);
 		}
 		else {
-			return ksp_word_get(lexer,NOT);
+			return ksp_word_get(lexer,TAG_NOT);
 		}
 	default:
 		break;
@@ -293,30 +300,33 @@ ksp_word_t* ksp_word_read(ksp_lexer_t* lexer)
 			k_buffer_write_ch(&sb, ch);
 			ch =  next_char(lexer);
 		}
-		return getWord(Tag.NUMBER, sb.toString());
+		return ksp_word_get3(lexer,TAG_NUMBER,k_buffer_get_data(&sb),k_buffer_get_len(&sb));
 	}
 	else if (is_id_start(ch)) {
 		while (is_id_part(ch)) {
 			k_buffer_write_ch(&sb, ch);
 			ch =  next_char(lexer);
 		}
-		String str = sb.toString();
-		if (str_start_witch(str,"if")) {
-			return ksp_word_get(Tag.IF);
+		const char* str = k_buffer_get_data(&sb);
+		if (str_start_with(str,"if")) {
+			return ksp_word_get(lexer,TAG_IF);
 		}
-		else if (str_start_witch(str, "while")) {
-			return ksp_word_get(Tag.WHILE);
+		else if (str_start_with(str, "while")) {
+			return ksp_word_get(lexer,TAG_WHILE);
 		}
-		else if (str_start_witch(str, "else")) {
-			return ksp_word_get(Tag.ELSE);
+		else if (str_start_with(str, "else")) {
+			return ksp_word_get(lexer,TAG_ELSE);
 		}
-		else if (str_start_witch(str, "for")) {
-			return ksp_word_get(Tag.FOR);
+		else if (str_start_with(str, "for")) {
+			return ksp_word_get(lexer,TAG_FOR);
 		}
-		else if (str_start_witch(str, "return")) {
-			return ksp_word_get(Tag.RETURN);
+		else if (str_start_with(str, "return")) {
+			return ksp_word_get(lexer,TAG_RETURN);
 		}
-		return ksp_word_get(Tag.ID, str);
+		else if (str_start_with(str, "function")) {
+			return ksp_word_get(lexer, TAG_FUNCTION);
+		}
+		return ksp_word_get3(lexer,TAG_ID, str, k_buffer_get_len(&sb));
 	}
 	else if (ch == '\"') {
 		ch =  next_char(lexer);
@@ -329,7 +339,7 @@ ksp_word_t* ksp_word_read(ksp_lexer_t* lexer)
 			ch =  next_char(lexer);
 		}
 		 next_char(lexer);
-		return ksp_word_get(Tag.STRING, sb.toString());
+		 return ksp_word_get3(lexer, TAG_STRING, k_buffer_get_data(&sb), k_buffer_get_len(&sb));
 	}
 	else if (ch == '\'') {
 		ch =  next_char(lexer);
@@ -342,58 +352,8 @@ ksp_word_t* ksp_word_read(ksp_lexer_t* lexer)
 			ch =  next_char(lexer);
 		}
 		 next_char(lexer);
-		return getWord(Tag.STRING, sb.toString());
+		 return ksp_word_get3(lexer, TAG_STRING, k_buffer_get_data(&sb), k_buffer_get_len(&sb));
 	}
-	if (Character.isDigit(ch)) {
-			while (Character.isDigit(ch)) {
-				k_buffer_write_ch(&sb, ch);
-				ch =  next_char(lexer);
-			}
-			return getWord(Tag.NUMBER, sb.toString());
-		} else if (Character.isJavaIdentifierStart(ch)) {
-			while (Character.isJavaIdentifierPart(ch)) {
-				k_buffer_write_ch(&sb, ch);
-				ch =  next_char(lexer);
-			}
-			String str = sb.toString();
-			if ("if".equals(str)) {
-				return getWord(Tag.IF);
-			} else if ("while".equals(str)) {
-				return getWord(Tag.WHILE);
-			} else if ("else".equals(str)){
-				return getWord(Tag.ELSE);
-			} else if ("for".equals(str)){
-				return getWord(Tag.FOR);
-			} else if ("return".equals(str)){
-				return getWord(Tag.RETURN);
-			}
-			return getWord(Tag.ID, str);
-		}else if (ch=='\"'){
-			ch =  next_char(lexer);
-			while(ch != '\"'){
-				if(ch == '\\'){
-					ch =  next_char(lexer);
-					k_buffer_write_ch(&sb, ch);
-				}
-				k_buffer_write_ch(&sb, ch);
-				ch =  next_char(lexer);
-			}
-			 next_char(lexer);
-			return getWord(Tag.STRING,sb.toString());
-		}else if (ch=='\''){
-			ch =  next_char(lexer);
-			while(ch != '\''){
-				if(ch == '\\'){
-					k_buffer_write_ch(&sb, ch);
-					ch =  next_char(lexer);
-				}
-				k_buffer_write_ch(&sb, ch);
-				ch =  next_char(lexer);
-			}
-			 next_char(lexer);
-			return getWord(Tag.STRING,sb.toString());
-		}
-		return getWord(Tag.UNKNOW,ch); getWord(Tag.UNKNOW, ch);
 
-
+	return ksp_word_get_char(lexer, TAG_UNKNOW, ch);
 }

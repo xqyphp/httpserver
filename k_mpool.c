@@ -45,7 +45,6 @@ static block_t* pool_find_block(k_mpool_t* pool, int rq_size)
 
 static block_t* pool_new_block(k_mpool_t* pool, int block_size)
 {
-
 	block_t* block = (block_t*)k_malloc(sizeof(block_t) + block_size);
 	block->debug_index = pool->block_count++;
 	pool_add_block(pool, block, block_size);

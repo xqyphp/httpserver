@@ -24,7 +24,7 @@ void *k_realloc(void *mem_address, unsigned int newsize)
 	return realloc(mem_address, newsize);
 }
 
-enum log_level_e g_log_level = LEVEL_DEBUG;
+enum log_level_e g_log_level = LEVEL_INFO;
 
 static const char* get_level_string(enum log_level_e l)
 {

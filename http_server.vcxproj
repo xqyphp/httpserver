@@ -144,9 +144,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
+    <Text Include="Text.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ksp_lexer.h" />
+    <ClInclude Include="ksp_parser.h" />
     <ClInclude Include="k_buffer.h" />
     <ClInclude Include="k_event.h" />
     <ClInclude Include="k_cstd.h" />
@@ -162,6 +164,7 @@
   <ItemGroup>
     <ClCompile Include="http.c" />
     <ClCompile Include="ksp_lexer.c" />
+    <ClCompile Include="ksp_parser.c" />
     <ClCompile Include="k_buffer.c" />
     <ClCompile Include="k_event_linux.c" />
     <ClCompile Include="k_cstd.c" />

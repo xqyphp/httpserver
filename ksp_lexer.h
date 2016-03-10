@@ -11,12 +11,12 @@ typedef struct ksp_lexer_s ksp_lexer_t;
 
 enum ksp_tag_e
 {
-	IF = 0, ELSE, FOR, WHILE, RETURN,
-	RBL, RBR, SBL, SBR, BBL, BBR,
-	GT, LT, GE, LE, EQ, NOT, NE, AND,
-	PLUS, MINIS, MUL, DIV,
-	ID, AS, SEM, DOT, QUOTE, COMMA,
-	NUMBER, STRING, COLON, UNKNOW 
+	TAG_IF = 0, TAG_ELSE, TAG_FOR, TAG_WHILE, TAG_RETURN,TAG_FUNCTION,
+	TAG_RBL, TAG_RBR, TAG_SBL, TAG_SBR, TAG_BBL, TAG_BBR,
+	TAG_GT, TAG_LT, TAG_GE, TAG_LE, TAG_EQ, TAG_NOT, TAG_NE, TAG_AND,
+	TAG_PLUS, TAG_MINIS, TAG_MUL, TAG_DIV,
+	TAG_ID, TAG_AS, TAG_SEM, TAG_DOT, TAG_QUOTE, TAG_COMMA,
+	TAG_NUMBER, TAG_STRING, TAG_COLON, TAG_UNKNOW 
 };
 
 struct ksp_word_s
@@ -24,15 +24,15 @@ struct ksp_word_s
 	DEF_LIST_HEAD(struct ksp_word_s);
 	enum ksp_tag_e tag;
 	char* val;
-	k_size_t val_len;
+	int val_len;
 };
 
 struct ksp_lexer_s 
 {
 	const char* file_name;
-	char* text;
+	const char* text;
 	k_mpool_t* pool;
-	k_size_t text_len;
+	int text_len;
 	int index;
 	int line;
 	ksp_word_t* _current;
