@@ -147,7 +147,6 @@
     <Text Include="Text.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="hash_map.h" />
     <ClInclude Include="ksp_lexer.h" />
     <ClInclude Include="ksp_parser.h" />
     <ClInclude Include="ksp_runner.h" />
@@ -164,7 +163,6 @@
     <ClInclude Include="module_html.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="hash_map.c" />
     <ClCompile Include="http.c" />
     <ClCompile Include="ksp_lexer.c" />
     <ClCompile Include="ksp_parser.c" />

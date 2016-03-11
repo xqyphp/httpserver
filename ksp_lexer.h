@@ -45,6 +45,8 @@ k_status_t ksp_lexer_init_doc(ksp_lexer_t* lexer,const char* file);
 k_status_t ksp_lexer_init_string(ksp_lexer_t* lexer, const char* str);
 k_status_t ksp_lexer_destroy(ksp_lexer_t* lexer);
 
+int         ksp_word_ival(ksp_word_t* w);
+const char* ksp_word_sval(ksp_word_t* w);
 ksp_word_t* ksp_word_get_char(ksp_lexer_t* lexer, ksp_tag_t tag,char ch);
 ksp_word_t* ksp_word_get(ksp_lexer_t* lexer,ksp_tag_t tag);
 ksp_word_t* ksp_word_get2(ksp_lexer_t* lexer, ksp_tag_t tag, const char* val);

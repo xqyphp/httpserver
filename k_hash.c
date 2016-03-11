@@ -36,6 +36,11 @@ k_status_t k_hash_init_integer(k_hash_table_t* hash_table, k_mpool_t* pool,
 	return k_hash_init(hash_table, pool, hash_arr_size, fn_getkey, int_hash, int_compare);
 }
 
+k_status_t k_hash_entry_init(k_hash_entry_t* hash_entry)
+{
+	hash_entry->parent = K_NULL;
+	k_list_init((k_list_t*)hash_entry);
+}
 
 k_status_t k_hash_init(k_hash_table_t* hash_table, k_mpool_t* pool,
 	k_size_t buckets_count, k_getkey_t fn_getkey,
@@ -65,7 +70,7 @@ static void k_hash_bucket_init(k_hash_bucket_t* bucket, k_size_t hash_code)
 	k_list_init((k_list_t*)&bucket->hash_entries);
 }
 
-k_status_t k_hash_add(k_hash_table_t* hash_table, k_hash_entry_t* val)
+k_status_t k_hash_put(k_hash_table_t* hash_table, k_hash_entry_t* val)
 {
 	void* hash_key = hash_table->getkey(val);
 	k_size_t   hash_code = hash_table->gethash(hash_key,hash_table->buckets_count);

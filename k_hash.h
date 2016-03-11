@@ -30,10 +30,11 @@
 #include "k_list.h"
 #include "k_mpool.h"
 
+#define DEF_HASH_ENTRY_HEAD(hash_type) DEF_LIST_HEAD(hash_type);\
+	struct k_hash_bucket_s* parent
 struct k_hash_entry_s 
 {
-	DEF_LIST_HEAD(struct k_hash_entry_s);
-	struct k_hash_bucket_s* parent;
+	DEF_HASH_ENTRY_HEAD(struct k_hash_entry_s);
 };
 
 struct k_hash_bucket_s
@@ -63,6 +64,7 @@ k_status_t k_hash_init_string(k_hash_table_t* hash_table, k_mpool_t* pool,
 k_status_t k_hash_init_integer(k_hash_table_t* hash_table, k_mpool_t* pool,
 	k_size_t hash_arr_size, k_getkey_t fn_getkey);
 
+k_status_t k_hash_entry_init(k_hash_entry_t* hash_entry);
 
 k_status_t k_hash_init(k_hash_table_t* hash_table,k_mpool_t* pool,
 	k_size_t hash_arr_size,k_getkey_t fn_getkey,
@@ -70,7 +72,7 @@ k_status_t k_hash_init(k_hash_table_t* hash_table,k_mpool_t* pool,
 
 k_status_t k_hash_destroy(k_hash_table_t* hash_table);
 
-k_status_t k_hash_add(k_hash_table_t* hash_table, k_hash_entry_t* val);
+k_status_t k_hash_put(k_hash_table_t* hash_table, k_hash_entry_t* val);
 
 k_hash_entry_t* k_hash_get(k_hash_table_t* hash_table, void* key);
 

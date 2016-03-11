@@ -100,6 +100,15 @@ k_status_t ksp_lexer_destroy(ksp_lexer_t* lexer)
 	return K_SUCCESS;
 }
 
+int         ksp_word_ival(ksp_word_t* w)
+{
+	return atoi(w->val);
+}
+const char* ksp_word_sval(ksp_word_t* w)
+{
+	return w->val;
+}
+
 ksp_word_t* ksp_word_get_char(ksp_lexer_t* lexer, ksp_tag_t tag, char ch)
 {
 	return ksp_word_get3(lexer, tag, &ch, 1);
