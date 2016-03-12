@@ -239,7 +239,7 @@ static ksp_var_t* number(ksp_runner_t* r,ksp_tree_t* t)
 	return var;
 }
 
-static k_list_t expand(ksp_runner_t* r)
+static k_list_t expand(ksp_runner_t* r,)
 {
 	k_list_t list;
 	return list;
@@ -339,46 +339,115 @@ static void ksp_var_eq(ksp_var_t* var,ksp_var_t* lvar, ksp_var_t* rvar)
 
 static void ksp_var_gt(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
 {
-
+  k_bool_t result = K_FALSE;
+  if(rvar == K_NULL)
+    {
+      ksp_var_int_set(var, result);
+      return;
+    }
+  if (lvar->val.type == rvar->val.type) 
+    {
+      	result = memcmp(&lvar->val.val, &lvar->val.val, sizeof(lvar->val.val)) > 0;
+    }
+  ksp_var_int_set(var, result);
 }
 
 static void ksp_var_ge(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
 {
-
+  k_bool_t result = K_FALSE;
+  if(rvar == K_NULL)
+    {
+      ksp_var_int_set(var, result);
+      return;
+    }
+  if (lvar->val.type == rvar->val.type) 
+    {
+      	result = memcmp(&lvar->val.val, &lvar->val.val, sizeof(lvar->val.val)) >= 0;
+    }
+  ksp_var_int_set(var, result);
 }
 
-static void ksp_var_eq(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
+static void ksp_var_lt(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
+{
+  k_bool_t result = K_FALSE;
+  if(rvar == K_NULL)
+    {
+      ksp_var_int_set(var, result);
+      return;
+    }
+  if (lvar->val.type == rvar->val.type) 
+    {
+      	result = memcmp(&lvar->val.val, &lvar->val.val, sizeof(lvar->val.val)) < 0;
+    }
+  ksp_var_int_set(var, result);
+}
+
+static void ksp_var_le(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
+{
+  k_bool_t result = K_FALSE;
+  if(rvar == K_NULL)
+    {
+      ksp_var_int_set(var, result);
+      return;
+    }
+  if (lvar->val.type == rvar->val.type) 
+    {
+      	result = memcmp(&lvar->val.val, &lvar->val.val, sizeof(lvar->val.val)) <= 0;
+    }
+  ksp_var_int_set(var, result);
+}
+
+static void ksp_var_ne(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
+{
+    k_bool_t result = K_FALSE;
+  if(rvar == K_NULL)
+    {
+      ksp_var_int_set(var, result);
+      return;
+    }
+  if (lvar->val.type != rvar->val.type) 
+    {
+      	result = memcmp(&lvar->val.val, &lvar->val.val, sizeof(lvar->val.val)) != 0;
+    }
+  ksp_var_int_set(var, result);
+}
+
+static void ksp_var_plus(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
+{
+    k_bool_t result = K_FALSE;
+  if(rvar == K_NULL)
+    {
+      ksp_var_int_set(var, result);
+      return;
+    }
+  if (lvar->val.type == rvar->val.type) 
+    {
+      if(lvar->val.type == INT){
+	result = lvar->val.ival + rvar->val.ival;
+      }
+      //TODO
+    }
+  ksp_var_int_set(var, result);
+}
+
+static void ksp_var_minus(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
+{
+    k_bool_t result = K_FALSE;
+  if(rvar == K_NULL)
+    {
+      return;
+    }
+  if (lvar->val.type == rvar->val.type) 
+    {
+      result = memcmp(&lvar->val.val, &lvar->val.val, sizeof(lvar->val.val)) > 0;
+    }
+  ksp_var_int_set(var, result);
+}
+static void ksp_var_mul(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
 {
 
 }
-
-static void ksp_var_eq(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
-{
-
-}
-
-static void ksp_var_eq(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
-{
-
-}
-
-static void ksp_var_eq(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
-{
-
-}
-static void ksp_var_eq(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
-{
-
-}
-static void ksp_var_eq(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
-{
-
-}
-static void ksp_var_eq(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
-{
-
-}
-static void ksp_var_eq(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
+static void ksp_var_div(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
 {
 
 }
@@ -449,11 +518,11 @@ static ksp_var_t* arr_init(ksp_runner_t* r,ksp_tree_t* t)
 }
 static ksp_var_t* arr_ac(ksp_runner_t* r,ksp_tree_t* t)
 {
-	String name = r,t->w.getVal();
-	ksp_var_t* var = scope.getVar(name);
-	if (var == K_NULL)
-		return new ksp_var_t*("arr_not_define");
-	if (var.val.type != ValType.ARR)
+        const char* name = ksp_word_sval(t->word);
+        ksp_var_t* var = scope.getVar(name);
+        if (var == K_NULL)
+	  return ksp_var_create(r,"arr_not_define",K_FALSE,K_FALSE);
+	if (var->val.type != ValType.ARR)
 		return new ksp_var_t*("not arr");
 	ksp_var_t* index = process(r,t->left);
 	if (index.val.type == ValType.INT) {
