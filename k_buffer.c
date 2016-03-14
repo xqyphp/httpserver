@@ -13,10 +13,11 @@ k_status_t k_buffer_init(k_buffer_t* buffer, k_mpool_t* pool, k_size_t init_size
 
 k_status_t k_buffer_write(k_buffer_t* buffer, const void* data_ptr, k_size_t data_len)
 {
-	if (buffer->data_len - buffer->data_used < data_len) {
+	if (buffer->data_len - buffer->data_used <= data_len) {
 		char* odata = buffer->data_ptr;
 		k_size_t olen = buffer->data_len;
-		buffer->data_ptr = k_mpool_malloc(buffer->pool, buffer->data_len + data_len);
+		buffer->data_ptr = k_mpool_malloc(buffer->pool, buffer->data_len + data_len *2);
+		memset(buffer->data_ptr, 0, buffer->data_len + data_len *2);
 		buffer->data_len = olen + data_len;
 		memcpy(buffer->data_ptr, odata, olen);
 	}

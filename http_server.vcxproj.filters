@@ -49,6 +49,9 @@
     <ClCompile Include="ksp_runner.c">
       <Filter>Source Files\ksp</Filter>
     </ClCompile>
+    <ClCompile Include="module_ksp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="http.h">
@@ -93,10 +96,13 @@
     <ClInclude Include="ksp_runner.h">
       <Filter>Header Files\ksp</Filter>
     </ClInclude>
+    <ClInclude Include="module_ksp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
-    <Text Include="Text.txt" />
+    <Text Include="test.ksp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

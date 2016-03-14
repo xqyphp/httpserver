@@ -144,7 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
-    <Text Include="Text.txt" />
+    <Text Include="test.ksp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ksp_lexer.h" />
@@ -161,6 +161,7 @@
     <ClInclude Include="k_socket.h" />
     <ClInclude Include="k_types.h" />
     <ClInclude Include="module_html.h" />
+    <ClInclude Include="module_ksp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="http.c" />
@@ -178,6 +179,7 @@
     <ClCompile Include="k_socket.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="module_html.c" />
+    <ClCompile Include="module_ksp.c" />
     <ClCompile Include="sql.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

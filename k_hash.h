@@ -53,6 +53,7 @@ struct k_hash_table_s
 	k_getkey_t  getkey;
 	k_compare_t compare;
 	k_mpool_t* pool;
+	int val_count;
 };
 
 k_size_t str_hash(const char* str_val);
@@ -74,8 +75,8 @@ k_status_t k_hash_destroy(k_hash_table_t* hash_table);
 
 k_status_t k_hash_put(k_hash_table_t* hash_table, k_hash_entry_t* val);
 
-k_hash_entry_t* k_hash_get(k_hash_table_t* hash_table, void* key);
+k_hash_entry_t* k_hash_get(k_hash_table_t* hash_table, const void* key);
 
-k_hash_entry_t* k_hash_remove(k_hash_table_t* hash_table, void* key);
+k_hash_entry_t* k_hash_remove(k_hash_table_t* hash_table, const void* key);
 
 #endif

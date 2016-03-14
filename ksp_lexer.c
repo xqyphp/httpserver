@@ -41,16 +41,20 @@ static void ksp_lexer_init_common(ksp_lexer_t* lexer)
 	lexer->line = 1;
 	lexer->_current = K_NULL;
 	lexer->_look = K_NULL;
+	lexer->start_tag = "<?ksp";
+	lexer->end_tag = "?>";
+	lexer->bhtml = K_TRUE;
 	lexer->pool = k_mpool_create("lexer pool", 1024, 1024);
 	k_list_init(&lexer->_words);
 }
 
-k_status_t ksp_lexer_init_doc(ksp_lexer_t* lexer, const char* file)
+k_status_t ksp_lexer_init_doc(ksp_lexer_t* lexer, const char* file, print_back fn_print)
 {
 	FILE *fp = K_NULL;
 	
 	ksp_lexer_init_common(lexer);
 	lexer->file_name = file;
+	lexer->fn_print = fn_print;
 	fp = fopen(file, "r");
 	if (K_NULL == fp)
 	{
@@ -80,9 +84,10 @@ k_status_t ksp_lexer_init_doc(ksp_lexer_t* lexer, const char* file)
 	return K_SUCCESS;
 
 }
-k_status_t ksp_lexer_init_string(ksp_lexer_t* lexer, const char* str)
+k_status_t ksp_lexer_init_string(ksp_lexer_t* lexer, const char* str, print_back fn_print)
 {
 	ksp_lexer_init_common(lexer);
+	lexer->fn_print = fn_print;
 	lexer->text = str;
 	lexer->text_len = strlen(str);
 	ksp_word_next(lexer);
@@ -139,6 +144,18 @@ ksp_word_t* ksp_word_get3(ksp_lexer_t* lexer, ksp_tag_t tag,
 	return word;
 }
 
+static char current_char(ksp_lexer_t* lexer)
+{
+	if (lexer->index > lexer->text_len - 1) {
+		return (char)-1;
+	}
+
+	if (lexer->index < 0) {
+		return ' ';
+	}
+	return lexer->text[lexer->index];
+}
+
 static char look_char(ksp_lexer_t* lexer)
 {
 	if (lexer->index >= lexer->text_len - 1) {
@@ -154,6 +171,7 @@ static char look2_char(ksp_lexer_t* lexer)
 	}
 	return lexer->text[lexer->index + 2];
 }
+
 
 static char next_char(ksp_lexer_t* lexer)
 {
@@ -203,12 +221,14 @@ static k_bool_t str_start_with(const char* str, const char* part)
 ksp_word_t* ksp_word_read(ksp_lexer_t* lexer)
 {
 	char ch = look_char(lexer);
+
 	while (isspace(ch)) {
 		if ('\n' == ch) {
 			lexer->line++;
 		}
 		ch = next_char(lexer);
 	}
+
 	char ch2 = look2_char(lexer);
 	if (ch == '/'&&ch2 == '/') {
 		while (ch != '\n' && ch != (char)-1) {
@@ -217,7 +237,6 @@ ksp_word_t* ksp_word_read(ksp_lexer_t* lexer)
 		ch = next_char(lexer);
 		lexer->line++;
 	}
-
 
 	switch (ch) {
 	case '{':

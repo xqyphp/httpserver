@@ -8,8 +8,11 @@
 #include "k_hash.h"
 #include "http.h"
 #include "module_html.h"
+#include "module_ksp.h"
 #include "ksp_lexer.h"
 #include "ksp_parser.h"
+#include "ksp_runner.h"
+
 #define SERVER_PORT 6666
 
 #define MSG_TEST "msg from server!!!"
@@ -24,13 +27,17 @@ int my_http_request_process(http_connection_t* connection)
 	return -1;
 }
 
+void myprint(const char* msg) {
+	log_info("---------------%s",msg);
+}
 
 int main(int argc, const char * argv[]) {
-
+#if 0
+#if 0
 	ksp_lexer_t lexer;
 	const char* file = "C:\\Users\\lk\\Documents\\Visual Studio 2015\\Projects\\Test\\http_server\\Text.txt";
-	ksp_lexer_init_doc(&lexer, file);
-#if 0
+	ksp_lexer_init_doc(&lexer, file, myprint);
+
 	ksp_word_t* w;
 	while (1) {
 		w = ksp_word_read(&lexer);
@@ -39,23 +46,32 @@ int main(int argc, const char * argv[]) {
 			break;
 		}
 	}
-	
-#endif
+	system("pause");
+#else
 	ksp_parser_t parser;
 	ksp_parser_init(&parser, &lexer);
 	ksp_parser_parse(&parser);
+
+	ksp_runner_t runner;
+
+	ksp_runner_init(&runner, &parser, myprint);
+	ksp_runner_run(&runner);
+
 	ksp_parser_destroy(&parser);
 	system("pause");
-#if 0
+#endif
+#endif
+
+#if 1
 	http_application_t http_inst;
 
-	http_application_init(&http_inst, "/usr/local/www/", "localhost", SERVER_PORT);
+	http_application_init(&http_inst, "G:/", "localhost", SERVER_PORT);
 #if 0
 	http_module_t hello_module;
 	http_module_init(&hello_module, my_http_request_process);
 	http_module_register(&http_inst, &hello_module);
 #else
-	register_module_html(&http_inst);
+	register_module_ksp(&http_inst);
 #endif
 	
 

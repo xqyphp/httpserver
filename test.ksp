@@ -1,0 +1,27 @@
+function add(a,b)
+{
+	return a * b;
+}
+function max(a,b){
+	if(a>b)
+	{
+	 return a;
+	}
+	return b;
+}
+//1231
+function addAll(a,b){
+	sum = 0;
+	while((a=a+1)!=b){
+		sum = sum + a;
+	}
+	return sum;
+}
+
+a = 3;
+b = add(a+3,4);
+c = max(a,b);
+print(a);
+print(b);
+print(c);
+print(addAll(0,10));

@@ -5,6 +5,8 @@
 #include "k_buffer.h"
 #include "k_cstd.h"
 
+typedef void(*print_back)(const char* msg);
+
 typedef enum ksp_tag_e ksp_tag_t;
 typedef struct ksp_word_s ksp_word_t;
 typedef struct ksp_lexer_s ksp_lexer_t;
@@ -38,11 +40,16 @@ struct ksp_lexer_s
 	ksp_word_t* _current;
 	ksp_word_t* _look;
 	k_list_t    _words;
+	
+	const char* start_tag;
+	const char* end_tag;
+	print_back fn_print;
+	k_bool_t bhtml;
 };
 
 
-k_status_t ksp_lexer_init_doc(ksp_lexer_t* lexer,const char* file);
-k_status_t ksp_lexer_init_string(ksp_lexer_t* lexer, const char* str);
+k_status_t ksp_lexer_init_doc(ksp_lexer_t* lexer,const char* file, print_back fn_print);
+k_status_t ksp_lexer_init_string(ksp_lexer_t* lexer, const char* str, print_back fn_print);
 k_status_t ksp_lexer_destroy(ksp_lexer_t* lexer);
 
 int         ksp_word_ival(ksp_word_t* w);

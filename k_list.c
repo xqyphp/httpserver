@@ -1,5 +1,5 @@
 #include "k_list.h"
-
+#include <assert.h>
 void
 k_list_init(k_list_t* k_list)
 {
@@ -63,6 +63,8 @@ k_list_insert_before(k_list_t* pos,k_list_t* val)
      k_list_t* list_temp = pos->prev;
      k_list_link(list_temp,val);
      k_list_link(val,pos);
+	 assert(pos->prev == val);
+	 assert(val->next == pos);
 }
 
 void

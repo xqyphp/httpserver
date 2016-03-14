@@ -40,6 +40,7 @@ k_status_t k_hash_entry_init(k_hash_entry_t* hash_entry)
 {
 	hash_entry->parent = K_NULL;
 	k_list_init((k_list_t*)hash_entry);
+	return K_SUCCESS;
 }
 
 k_status_t k_hash_init(k_hash_table_t* hash_table, k_mpool_t* pool,
@@ -55,8 +56,10 @@ k_status_t k_hash_init(k_hash_table_t* hash_table, k_mpool_t* pool,
 	hash_table->gethash = fn_gethash;
 	hash_table->getkey = fn_getkey;
 	hash_table->compare = fn_compare;
+	hash_table->val_count = 0;
 	return K_SUCCESS;
 }
+
 
 k_status_t k_hash_destroy(k_hash_table_t* hash_table)
 {
@@ -91,10 +94,14 @@ k_status_t k_hash_put(k_hash_table_t* hash_table, k_hash_entry_t* val)
 		
 	}
 	k_list_insert_before((k_list_t*)&bucket->hash_entries, (k_list_t*)val);
+	k_hash_entry_t* entries = &bucket->hash_entries;
+	hash_table->val_count++;
+	assert(val->next != val);
+	assert(val->prev != val);
 	return K_SUCCESS;
 }
 
-k_hash_entry_t* k_hash_get(k_hash_table_t* hash_table, void* key)
+k_hash_entry_t* k_hash_get(k_hash_table_t* hash_table, const void* key)
 {
 	k_size_t   hash_code = hash_table->gethash(key,hash_table->buckets_count);
 	k_hash_bucket_t* bucket = hash_table->buckets[hash_code];
@@ -107,6 +114,7 @@ k_hash_entry_t* k_hash_get(k_hash_table_t* hash_table, void* key)
 	k_list_t* list_next = (k_list_t*)entries->next;
 	while (list_next !=(k_list_t*)entries)
 	{
+		assert(list_next->next != list_next);
 		void* this_key = hash_table->getkey(list_next);
 		if (hash_table->compare(key, this_key) == 0) {
 			return (k_hash_entry_t*)list_next;
@@ -117,12 +125,12 @@ k_hash_entry_t* k_hash_get(k_hash_table_t* hash_table, void* key)
 	return K_NULL;
 }
 
-k_hash_entry_t* k_hash_remove(k_hash_table_t* hash_table, void* key)
+k_hash_entry_t* k_hash_remove(k_hash_table_t* hash_table, const void* key)
 {
 	k_hash_entry_t* entry = k_hash_get(hash_table, key);
 	if (entry == K_NULL) {
 		return K_NULL;
 	}
-
+	hash_table->val_count++;
 	return (k_hash_entry_t*)k_list_remove((k_list_t*)entry);
 }

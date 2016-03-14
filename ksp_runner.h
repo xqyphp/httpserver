@@ -28,7 +28,7 @@ struct ksp_val_s {
 	union
 	{
 		int ival;
-		const char* sval;
+		char* sval;
 		ksp_tree_t* fbodyval;
 	}val;
 	k_hash_table_t objval;
@@ -52,6 +52,7 @@ struct ksp_scope_s
 	ksp_scope_t* parent;
 	k_hash_table_t vars;
 	k_mpool_t* pool;
+	int count;
 };
 
 struct ksp_runner_s {
@@ -59,10 +60,12 @@ struct ksp_runner_s {
 	ksp_parser_t* parser;
 	ksp_tree_t* current;
 	k_mpool_t* pool;
+	print_back fn_print;
 };
 
 k_status_t ksp_val_int_set(ksp_val_t* val,int ival);
 k_status_t ksp_val_string_set(ksp_val_t* val, const char* sval);
+k_status_t ksp_val_string_cat(ksp_val_t* val, const char* sval);
 k_status_t ksp_val_function_set(ksp_val_t* val, ksp_tree_t* func);
 
 k_status_t ksp_var_int_set(ksp_var_t* var, int ival);
@@ -85,7 +88,7 @@ ksp_var_t* ksp_scope_get(ksp_runner_t* runner, const char* name);
 k_status_t ksp_scope_add(ksp_runner_t* runner, const char* name, ksp_val_t* val);
 k_status_t ksp_scope_update(ksp_runner_t* runner, const char* name, ksp_val_t* val);
 
-k_status_t ksp_runner_init(ksp_runner_t* runner, ksp_parser_t* parser);
+k_status_t ksp_runner_init(ksp_runner_t* runner, ksp_parser_t* parser, print_back fn_print);
 k_status_t ksp_runner_run(ksp_runner_t* runner);
 k_status_t ksp_runner_destroy(ksp_runner_t* runner);
 
