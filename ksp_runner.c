@@ -217,8 +217,11 @@ static ksp_var_t* progrom(ksp_runner_t* r, ksp_tree_t* t)
 		return K_NULL;
 	}
 	r->current = t;
-	//process(r, t->left);
-	return process(r, t);
+	ksp_var_t* lvar = process(r, t->left);
+	if (t->right != K_NULL) {
+		return process(r, t->right);
+	}
+	return lvar;
 }
 
 static ksp_var_t* function1(ksp_runner_t* r, ksp_tree_t* t)
