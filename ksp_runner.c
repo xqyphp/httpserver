@@ -110,6 +110,7 @@ ksp_var_t* ksp_var_create(ksp_scope_t* scope, const char* name, k_bool_t bTemp, 
 	strncpy(var->name, name, NAME_LEN);
 	var->bTemp = bTemp;
 	var->bReturn = bReturn;
+	var->scope = scope;
 	return var;
 }
 
@@ -216,8 +217,8 @@ static ksp_var_t* progrom(ksp_runner_t* r, ksp_tree_t* t)
 		return K_NULL;
 	}
 	r->current = t;
-	process(r, t->left);
-	return process(r, t->right);
+	//process(r, t->left);
+	return process(r, t);
 }
 
 static ksp_var_t* function1(ksp_runner_t* r, ksp_tree_t* t)
