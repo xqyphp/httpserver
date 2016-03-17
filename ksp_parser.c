@@ -160,6 +160,11 @@ static ksp_tree_t* func(ksp_parser_t* parser) {
 		tree_set_right(t, block(parser));
 		return t;
 	}
+	else if (w->tag == TAG_TEXT) {
+		ksp_tree_t* t = tree_new3(parser, TEXT, w);
+		ksp_word_next(lexer);
+		return t;
+	}
 	else {
 		return statement(parser);
 	}

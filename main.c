@@ -28,7 +28,7 @@ int my_http_request_process(http_connection_t* connection)
 }
 
 void myprint(const char* msg) {
-	log_info("------cccc---------%s",msg);
+	log_info("------>%s",msg);
 }
 
 int main(int argc, const char * argv[]) {
@@ -39,9 +39,12 @@ int main(int argc, const char * argv[]) {
 	ksp_lexer_init_doc(&lexer, file, myprint);
 #if 0
 	ksp_word_t* w;
+
 	while (1) {
-		w = ksp_word_read(&lexer);
-		log_info("%s", w->val);
+		w = ksp_word_look(&lexer);
+		log_info("%d->%s",w->tag, w->val);
+
+		w = ksp_word_next(&lexer);
 		if (TAG_UNKNOW == w->tag) {
 			break;
 		}

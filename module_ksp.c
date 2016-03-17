@@ -68,9 +68,31 @@ void register_module_ksp(http_application_t* pHttp)
 	http_module_register(pHttp, &g_http_module_ksp);
 }
 
-static void parser_ksp(const char* fsrc, const char* fdes)
+static k_status_t parser_ksp(const char* src, const char* des)
 {
+	FILE *fs = K_NULL;
+	FILE *fd = K_NULL;
 
+	fs= fopen(src, "r");
+
+	if (fs == K_NULL) {
+		return K_ERROR;
+	}
+	fd = fopen(des, "w");
+
+	fseek(fs, 0, SEEK_END);
+	long len = ftell(fs);
+
+	char* text = (char*)malloc(len + 1);
+	fread(text, 1, len, fs);
+	text[len] = '\0';
+
+	char* ptr = strstr(text, "<?");
+
+
+
+	fclose(fs);
+	fclose(fd);
 }
 
 /*

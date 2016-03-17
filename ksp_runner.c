@@ -681,6 +681,16 @@ static ksp_var_t* string(ksp_runner_t* r, ksp_tree_t* t)
 	ksp_var_string_set(var, sval);
 	return var;
 }
+//TODO
+static ksp_var_t* text(ksp_runner_t* r, ksp_tree_t* t)
+{
+	ksp_var_t* var = ksp_var_create(r->scope, "str", K_FALSE, K_FALSE);
+	const char* sval = ksp_word_sval(t->word);
+	ksp_var_string_set(var, sval);
+	r->fn_print(sval);
+	return var;
+}
+
 static ksp_var_t* process(ksp_runner_t* r, ksp_tree_t* t)
 {
 	if (t == K_NULL) {
@@ -724,6 +734,8 @@ static ksp_var_t* process(ksp_runner_t* r, ksp_tree_t* t)
 		return arr_ac(r, t);
 	case STRING:
 		return string(r, t);
+	case TEXT:
+		return text(r, t);
 	default:
 		assert(K_FALSE);
 		return K_NULL;

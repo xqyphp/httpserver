@@ -218,8 +218,63 @@ static k_bool_t str_start_with(const char* str, const char* part)
 	return strstr(str, part) != K_NULL;
 }
 
+
+
 ksp_word_t* ksp_word_read(ksp_lexer_t* lexer)
 {
+#if 1
+	char ch = look_char(lexer);
+	char ch2 = look2_char(lexer);
+	if (lexer->bhtml) {
+		k_buffer_t html_buffer;
+		k_buffer_init(&html_buffer, lexer->pool, 1024);
+		while (!(ch == '<' && ch2 == '?'))
+		{
+			if (lexer->index >= lexer->text_len - 1) {
+				break;
+			}
+			k_buffer_write_ch(&html_buffer, current_char(lexer));
+			if ('\n' == ch) {
+				lexer->line++;
+			}
+			ch = next_char(lexer);
+			ch2 = look2_char(lexer);
+		}
+
+		next_char(lexer);
+		next_char(lexer);
+
+		lexer->bhtml = K_FALSE;
+		return ksp_word_get3(lexer, TAG_TEXT, k_buffer_get_data(&html_buffer), k_buffer_get_len(&html_buffer));
+	}
+
+	ch = look_char(lexer);
+	while (isspace(ch)) {
+		if ('\n' == ch) {
+			lexer->line++;
+		}
+		ch = next_char(lexer);
+	}
+	ch2 = look2_char(lexer);
+	if (ch == '?' && ch2 == '>') {
+		next_char(lexer);
+		next_char(lexer);
+		next_char(lexer);
+		lexer->bhtml = K_TRUE;
+		return ksp_word_read(lexer);
+	}
+
+	ch = look_char(lexer);
+	ch2 = look2_char(lexer);
+	if (ch == '/'&&ch2 == '/') {
+		while (ch != '\n' && ch != (char)-1) {
+			ch = next_char(lexer);
+		}
+		ch = next_char(lexer);
+		lexer->line++;
+	}
+
+#else
 	char ch = look_char(lexer);
 
 	while (isspace(ch)) {
@@ -238,6 +293,7 @@ ksp_word_t* ksp_word_read(ksp_lexer_t* lexer)
 		lexer->line++;
 	}
 
+#endif
 	switch (ch) {
 	case '{':
 		next_char(lexer);
