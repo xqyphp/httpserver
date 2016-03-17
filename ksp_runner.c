@@ -41,7 +41,9 @@ k_status_t ksp_val_string_set(ksp_val_t* val, const char* sval)
 k_status_t ksp_val_string_cat(ksp_val_t* val, const char* sval)
 {
 	assert(val->type == VAL_STRING);
+	const char* val_old = val->val.sval;
 	val->val.sval = k_mpool_malloc(val->var->scope->pool, strlen(sval) + strlen(val->val.sval) + 1);
+	strcpy(val->val.sval, val_old);
 	strcat(val->val.sval, sval);
 	return K_SUCCESS;
 }
@@ -116,8 +118,18 @@ ksp_var_t* ksp_var_create(ksp_scope_t* scope, const char* name, k_bool_t bTemp, 
 
 k_status_t ksp_var_setval(ksp_var_t* var, ksp_val_t* val)
 {
-	var->val.type = val->type;
-	var->val.val = val->val;
+	if (val->type == VAL_STRING) {
+		ksp_val_string_set(&var->val, val->val.sval);
+	}
+	else if (val->type == VAL_INT) {
+		ksp_val_int_set(&var->val, val->val.ival);
+	}
+	else if (val->type == VAL_FUNCTION) {
+		var->val.type = val->type;
+		var->val.val = val->val;
+	}
+
+	
 	return K_SUCCESS;
 }
 ksp_val_t* ksp_var_getval(ksp_var_t* var)
@@ -215,6 +227,9 @@ static ksp_var_t* progrom(ksp_runner_t* r, ksp_tree_t* t)
 {
 	if (t == K_NULL) {
 		return K_NULL;
+	}
+	if (t->type != PROGROM) {
+		return process(r, t);
 	}
 	r->current = t;
 	ksp_var_t* lvar = process(r, t->left);
@@ -486,7 +501,7 @@ static void ksp_var_ne(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
 
 static void ksp_var_plus(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
 {
-	k_bool_t result = K_FALSE;
+	int result = K_FALSE;
 	if (rvar == K_NULL)
 	{
 		ksp_var_int_set(var, result);
@@ -497,7 +512,7 @@ static void ksp_var_plus(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
 		if (lvar->val.type == VAL_INT) {
 			result = lvar->val.val.ival + rvar->val.val.ival;
 		}
-		else if (lvar->val.type = VAL_STRING) {
+		else if (lvar->val.type == VAL_STRING) {
 			char buffer[32];
 			const char *rval_str = "";
 			if (rvar->val.type == VAL_STRING) {
@@ -509,6 +524,8 @@ static void ksp_var_plus(ksp_var_t* var, ksp_var_t* lvar, ksp_var_t* rvar)
 			}
 
 			ksp_val_string_cat(&lvar->val, rval_str);
+			ksp_var_setval(var, &lvar->val);
+			return;
 		}
 	}
 	ksp_var_int_set(var, result);

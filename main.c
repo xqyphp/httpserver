@@ -28,16 +28,16 @@ int my_http_request_process(http_connection_t* connection)
 }
 
 void myprint(const char* msg) {
-	log_info("---------------%s",msg);
+	log_info("------cccc---------%s",msg);
 }
 
 int main(int argc, const char * argv[]) {
 #if 0
-#if 0
-	ksp_lexer_t lexer;
-	const char* file = "C:\\Users\\lk\\Documents\\Visual Studio 2015\\Projects\\Test\\http_server\\Text.txt";
-	ksp_lexer_init_doc(&lexer, file, myprint);
 
+	ksp_lexer_t lexer;
+	const char* file = "C:\\Users\\lk\\Documents\\Visual Studio 2015\\Projects\\Test\\http_server\\test.ksp";
+	ksp_lexer_init_doc(&lexer, file, myprint);
+#if 0
 	ksp_word_t* w;
 	while (1) {
 		w = ksp_word_read(&lexer);
@@ -74,7 +74,6 @@ int main(int argc, const char * argv[]) {
 	register_module_ksp(&http_inst);
 #endif
 	
-
 	http_application_start(&http_inst);
 	http_application_destory(&http_inst);
 #endif

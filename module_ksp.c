@@ -68,13 +68,10 @@ void register_module_ksp(http_application_t* pHttp)
 	http_module_register(pHttp, &g_http_module_ksp);
 }
 
+static void parser_ksp(const char* fsrc, const char* fdes)
+{
 
-
-
-
-
-
-
+}
 
 /*
 char ch = look_char(lexer);

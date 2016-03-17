@@ -103,6 +103,7 @@
   <ItemGroup>
     <Text Include="ReadMe.txt" />
     <Text Include="test.ksp" />
+    <Text Include="test.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
