@@ -127,7 +127,7 @@ k_status_t  event_dispatch(event_manager_t* manager)
 		clientfd = accept(manager->server_socket, (SOCKADDR*)&saRemote, &RemoteLen);
 		if (SOCKET_ERROR == clientfd) {
 			printf("acceptSocket Error->%d\n", GetLastError());
-			return -1;
+			continue;
 		}
 
 		socket_event_t sock_event;
